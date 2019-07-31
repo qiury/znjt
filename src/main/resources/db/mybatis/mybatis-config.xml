@@ -63,33 +63,34 @@
             我们只要实现DataSourceFacotry接口的方法，提供自己数据源就可以实现自定义数据源了
             -->
             <dataSource type="com.znjt.datasource.DefineDataSourceFactory">
-                <property name="druid.driver" value="${druid.driver}"/>
-                <property name="druid.url" value="${db_master.url}"/>
-                <property name="druid.username" value="${db_master.username}"/>
-                <property name="druid.password" value="${db_master.password}"/>
-                <property name="druid.initialSize" value="${druid.initialSize}"/>
-                <property name="druid.maxActive" value="${druid.maxActive}"/>
+                <property name="driver" value="${druid.driver}"/>
+                <property name="url" value="${db_master.url}"/>
+                <property name="username" value="${db_master.username}"/>
+                <property name="password" value="${db_master.password}"/>
+                <property name="initialSize" value="${druid.initialSize}"/>
+                <property name="maxActive" value="${druid.maxActive}"/>
                 <property name="maxWait" value="${druid.maxWait}"/>
-                <property name="druid.useUnfairLock" value="${druid.useUnfairLock}"/>
-                <property name="druid.timeBetweenEvictionRunsMillis" value="${druid.timeBetweenEvictionRunsMillis}"/>
-                <property name="druid.minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}"/>
-                <property name="druid.testOnBorrow" value="${druid.testOnBorrow}"/>
-                <property name="druid.testOnReturn" value="${druid.testOnReturn}"/>
-                <property name="druid.testWhileIdle" value="${druid.testWhileIdle}"/>
-                <property name="druid.validationQuery" value="${druid.validationQuery}"/>
-                <property name="druid.poolPreparedStatements" value="${druid.poolPreparedStatements}"/>
-                <property name="druid.maxPoolPreparedStatementPerConnectionSize" value="${druid.maxPoolPreparedStatementPerConnectionSize}"/>
+                <property name="useUnfairLock" value="${druid.useUnfairLock}"/>
+                <property name="timeBetweenEvictionRunsMillis" value="${druid.timeBetweenEvictionRunsMillis}"/>
+                <property name="minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}"/>
+                <property name="testOnBorrow" value="${druid.testOnBorrow}"/>
+                <property name="testOnReturn" value="${druid.testOnReturn}"/>
+                <property name="testWhileIdle" value="${druid.testWhileIdle}"/>
+                <property name="validationQuery" value="${druid.validationQuery}"/>
+                <property name="poolPreparedStatements" value="${druid.poolPreparedStatements}"/>
+                <property name="maxPoolPreparedStatementPerConnectionSize" value="${druid.maxPoolPreparedStatementPerConnectionSize}"/>
 
-                <property name="druid.removeAbandoned" value="${druid.removeAbandoned}"/>
-                <property name="druid.removeAbandonedTimeout" value="${druid.removeAbandonedTimeout}"/>
-                <property name="druid.logAbandoned" value="${druid.logAbandoned}"/>
-                <property name="druid.maxIdle" value="${druid.maxIdle}"/>
-                <property name="druid.minIdle" value="${druid.minIdle}"/>
+                <property name="removeAbandoned" value="${druid.removeAbandoned}"/>
+                <property name="removeAbandonedTimeout" value="${druid.removeAbandonedTimeout}"/>
+                <property name="logAbandoned" value="${druid.logAbandoned}"/>
+                <property name="maxIdle" value="${druid.maxIdle}"/>
+                <property name="minIdle" value="${druid.minIdle}"/>
 
-                <property name="druid.failFast" value="${druid.failFast}"/>
-                <property name="druid.connectionErrorRetryAttempts" value="${druid.connectionErrorRetryAttempts}"/>
-                <property name="druid.breakAfterAcquireFailure" value="${druid.breakAfterAcquireFailure}"/>
-                <property name="druid.timeBetweenConnectErrorMillis" value="${druid.timeBetweenConnectErrorMillis}"/>
+                <property name="failFast" value="${druid.failFast}"/>
+                <property name="connectionErrorRetryAttempts" value="${druid.connectionErrorRetryAttempts}"/>
+                <property name="breakAfterAcquireFailure" value="${druid.breakAfterAcquireFailure}"/>
+                <property name="timeBetweenConnectErrorMillis" value="${druid.timeBetweenConnectErrorMillis}"/>
+                <property name="keepAlive" value="${druid.keepAlive}"/>
 
             </dataSource>
         </environment>
@@ -102,33 +103,34 @@
             我们只要实现DataSourceFacotry接口的方法，提供自己数据源就可以实现自定义数据源了
             -->
             <dataSource type="com.znjt.datasource.DefineDataSourceFactory">
-                <property name="druid.driver" value="${druid.driver}"/>
-                <property name="druid.url" value="${db_slave.url}"/>
-                <property name="druid.username" value="${db_slave.username}"/>
-                <property name="druid.password" value="${db_slave.password}"/>
-                <property name="druid.initialSize" value="${druid.initialSize}"/>
-                <property name="druid.maxActive" value="${druid.maxActive}"/>
+                <property name="driver" value="${druid.driver}"/>
+                <property name="url" value="${db_slave.url}"/>
+                <property name="username" value="${db_slave.username}"/>
+                <property name="password" value="${db_slave.password}"/>
+                <property name="initialSize" value="${druid.initialSize}"/>
+                <property name="maxActive" value="${druid.maxActive}"/>
                 <property name="maxWait" value="${druid.maxWait}"/>
-                <property name="druid.useUnfairLock" value="${druid.useUnfairLock}"/>
-                <property name="druid.timeBetweenEvictionRunsMillis" value="${druid.timeBetweenEvictionRunsMillis}"/>
-                <property name="druid.minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}"/>
-                <property name="druid.testOnBorrow" value="${druid.testOnBorrow}"/>
-                <property name="druid.testOnReturn" value="${druid.testOnReturn}"/>
-                <property name="druid.testWhileIdle" value="${druid.testWhileIdle}"/>
-                <property name="druid.validationQuery" value="${druid.validationQuery}"/>
-                <property name="druid.poolPreparedStatements" value="${druid.poolPreparedStatements}"/>
-                <property name="druid.maxPoolPreparedStatementPerConnectionSize" value="${druid.maxPoolPreparedStatementPerConnectionSize}"/>
+                <property name="useUnfairLock" value="${druid.useUnfairLock}"/>
+                <property name="timeBetweenEvictionRunsMillis" value="${druid.timeBetweenEvictionRunsMillis}"/>
+                <property name="minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}"/>
+                <property name="testOnBorrow" value="${druid.testOnBorrow}"/>
+                <property name="testOnReturn" value="${druid.testOnReturn}"/>
+                <property name="testWhileIdle" value="${druid.testWhileIdle}"/>
+                <property name="validationQuery" value="${druid.validationQuery}"/>
+                <property name="poolPreparedStatements" value="${druid.poolPreparedStatements}"/>
+                <property name="maxPoolPreparedStatementPerConnectionSize" value="${druid.maxPoolPreparedStatementPerConnectionSize}"/>
 
-                <property name="druid.removeAbandoned" value="${druid.removeAbandoned}"/>
-                <property name="druid.removeAbandonedTimeout" value="${druid.removeAbandonedTimeout}"/>
-                <property name="druid.logAbandoned" value="${druid.logAbandoned}"/>
-                <property name="druid.maxIdle" value="${druid.maxIdle}"/>
-                <property name="druid.minIdle" value="${druid.minIdle}"/>
+                <property name="removeAbandoned" value="${druid.removeAbandoned}"/>
+                <property name="removeAbandonedTimeout" value="${druid.removeAbandonedTimeout}"/>
+                <property name="logAbandoned" value="${druid.logAbandoned}"/>
+                <property name="maxIdle" value="${druid.maxIdle}"/>
+                <property name="minIdle" value="${druid.minIdle}"/>
 
-                <property name="druid.failFast" value="${druid.failFast}"/>
-                <property name="druid.connectionErrorRetryAttempts" value="${druid.connectionErrorRetryAttempts}"/>
-                <property name="druid.breakAfterAcquireFailure" value="${druid.breakAfterAcquireFailure}"/>
-                <property name="druid.timeBetweenConnectErrorMillis" value="${druid.timeBetweenConnectErrorMillis}"/>
+                <property name="failFast" value="${druid.failFast}"/>
+                <property name="connectionErrorRetryAttempts" value="${druid.connectionErrorRetryAttempts}"/>
+                <property name="breakAfterAcquireFailure" value="${druid.breakAfterAcquireFailure}"/>
+                <property name="timeBetweenConnectErrorMillis" value="${druid.timeBetweenConnectErrorMillis}"/>
+                <property name="keepAlive" value="${druid.keepAlive}"/>
 
             </dataSource>
         </environment>
@@ -184,11 +186,11 @@
         mybatis在匹配statement时，首先根据databaseId进行精确匹配，如果没有设置databaseId
         就根据statementid进行匹配。
     -->
-    <databaseIdProvider type="DB_VENDOR">
-        <!--为不同厂商的信息起别名，方面后面使用-->
-        <property name="MySQL" value="mysql"/>
-        <property name="Oracle" value="oracle"/>
-    </databaseIdProvider>
+    <!--    <databaseIdProvider type="DB_VENDOR">-->
+    <!--        &lt;!&ndash;为不同厂商的信息起别名，方面后面使用&ndash;&gt;-->
+    <!--        <property name="MySQL" value="mysql"/>-->
+    <!--        <property name="Oracle" value="oracle"/>-->
+    <!--    </databaseIdProvider>-->
     <mappers>
         <!--指定接口的名称（主要用于配置具有注解映射的接口）
            1. 如果存在mapper配置文件，要求mapper配置文件的名称和接口名称相同，且要放在同一目录下

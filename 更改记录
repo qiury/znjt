@@ -1,0 +1,153 @@
+数据库后台参数优化
+[mysqld]
+max_allowed_packet = 32M
+binlog_cache_size = 1M
+read_buffer_size = 64M
+sort_buffer_size = 8M
+query_cache_size = 8M
+query_cache_limit = 2M
+transaction_isolation = READ-COMMITTED
+#超过30天的binlog删除
+expire_logs_days = 30
+#InnoDB为独立表空间模式，每个数据库的每个表都会生成一个数据空间
+innodb_file_per_table = 1
+#限制Innodb能打开的表的数据，如果库里的表特别多的情况，请增加这个,默认是300
+innodb_open_files = 500
+
+# InnoDB使用一个缓冲池来保存索引和原始数据这里你设置越大,你在存取表里面数据时所需要的磁盘I/O越少.
+# 在一个独立使用的数据库服务器上,你可以设置这个变量到服务器物理内存大小的80%
+# 不要设置过大,否则,由于物理内存的竞争可能导致操作系统的换页颠簸.
+innodb_buffer_pool_size =  2G
+#在高写入负载尤其是大数据集的情况下很重要,这个值越大则性能相对越高，但是要注意到可能会增加恢复时间,常设置为64-512MB，根据服务器大小而异。
+innodb_log_file_size = 256M
+#默认的设置在中等强度写入负载以及较短事务的情况下，服务器性能还可以,通常8-16MB就足够了
+innodb_log_buffer_size =16M
+
+read_buffer_size = 4M
+
+# 为提高性能，MySQL可以以循环方式将日志文件写到多个文件,推荐设置为3
+innodb_log_files_in_group = 3
+
+内存4G的例子：
+[client]
+port        = 3306
+socket      = /tmp/mysql.sock
+
+[mysqld]
+port        = 3306
+socket      = /tmp/mysql.sock
+user    = mariadb
+basedir = /usr/local/mariadb
+datadir = /data/mysql
+log_error = /data/mysql/mariadb.err
+pid-file = /data/mysql/mariadb.pid
+skip-external-locking
+key_buffer_size = 64M
+max_allowed_packet = 1M
+table_open_cache = 256
+sort_buffer_size = 1M
+net_buffer_length = 8K
+read_buffer_size = 1M
+read_rnd_buffer_size = 512K
+myisam_sort_buffer_size = 16M
+thread_cache_size = 32
+query_cache_size = 32M
+tmp_table_size = 64M
+
+explicit_defaults_for_timestamp = true
+#skip-networking
+max_connections = 500
+max_connect_errors = 100
+open_files_limit = 65535
+
+log-bin=mysql-bin
+binlog_format=mixed
+server-id   = 1
+expire_logs_days = 10
+
+default_storage_engine = InnoDB
+innodb_file_per_table = 1
+innodb_data_home_dir = /data/mysql
+innodb_data_file_path = ibdata1:10M:autoextend
+innodb_log_group_home_dir = /data/mysql
+innodb_buffer_pool_size = 256M
+innodb_log_file_size = 64M
+innodb_log_buffer_size = 8M
+innodb_flush_log_at_trx_commit = 1
+innodb_lock_wait_timeout = 50
+
+[mysqldump]
+quick
+max_allowed_packet = 16M
+
+[mysql]
+no-auto-rehash
+
+[myisamchk]
+key_buffer_size = 64M
+sort_buffer_size = 1M
+read_buffer = 2M
+write_buffer = 2M
+
+[mysqlhotcopy]
+interactive-timeout
+
+
+数据库结构修改
+0. 修改数据的隔离级别
+select @@global.tx_isolation,@@tx_isolation;
+set session tx_isolation='read-committed';
+set GLOBAL tx_isolation='read-committed';
+
+1. 在gps表中根据id、设备名称创建联合唯一约束(理论上防止采集数据库的重复数据)，索引类型btree，根据这些信息生成代表该条记录的md5码
+alter table gps add unique index gps_4_distributed_system (gpsid,status)
+
+2. 在gps表中增加dataid列，用于表示当前记录的身份（在分布式环境数据的id是可能会重复的）
+alter table gps add COLUMN dataid varchar(70) unique comment '数据记录身份'
+
+3. acc表中也进行类似gps的处理
+
+4. 在GPS表中增加utime和ctime字段，记录当前数据的最新更新时间，该记录的日期是数据库自动维护的
+alter table gps add COLUMN ctime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP comment '入库时间'
+alter table gps add COLUMN utime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+
+5. 在gps表中添加表示image是否上传的标记
+alter table gps add column img_uploaded boolean not null default false comment '图像是否已经上传'
+
+6. 在gps表中添加表示image是否损坏或者丢失的标记
+alter table gps add column img_err boolean not null default false comment '图像是否损坏或者丢失'
+
+7. 在gps表中添加basedir字段，表示图像存储的根路径，这样做是为了兼容不同平台的需要
+alter table gps add column basedir varchar(70) not null default '' comment '图像存储的根路径'
+
+
+8. 在acc表中添加表示uploadstatus是否上传的标记
+ alter table acc add column uploadstatus tinyint not null default 0 comment '记录是否已经上传'
+
+9. 在ACC表中增加ctime字段，记录当前数据的插入时间
+ alter table acc add COLUMN ctime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP comment '入库时间'
+
+10. 在acc表的服务器端创建accid唯一索引，accid的值=客户端的(id_status_accid)
+alter table acc add unique index acc_4_distributed_system (accid)
+
+11. acc表添加自增主键
+alter table acc add id bigint not null primary key Auto_increment
+
+12. 在gps中添加total_losted_size字段，表示总计丢失文件的个数
+alter table gps add column total_losted_size tinyint not null default 0 comment '当前记录文件总计丢失个数'
+
+13. 注意：在gps表中，把original_url的默认值设置为null，而不是"NULL";
+
+14. 修改iri和pci表中uploadstatus数据类型
+alter table iri/pci modify column uploadstatus tinyint not null default 0 comment '记录是否已经上传'
+15. 在iri和pci表中增加ctime字段，记录当前数据的插入时间
+alter table iri/pci add COLUMN ctime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP comment '入库时间'
+
+16.在iri/pci表中增加dataid列，用于表示当前记录的身份（在分布式环境数据的id是可能会重复的）
+alter table iri/pci add COLUMN dataid varchar(70) unique comment '数据记录身份'
+
+17.在iri表的服务器端创建iriid唯一索引，accid的值=客户端的(id_status_accid)
+alter table iri add unique index iri_4_distributed_system (accid)
+18.iri/pci表添加自增主键
+alter table iri/pci add id bigint not null primary key Auto_increment
+

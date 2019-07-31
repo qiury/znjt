@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- status属性是log4j2自身框架的日志级别(status="OFF")
+    monitorInterval自动检测配置文件的时间间隔（单位：秒），最小间隔为5秒。
+    log4j 2检测到配置文件有变化，会重新配置自己。
+-->
+<Configuration  status="OFF" monitorInterval="60">
+
+    <!-- 公共的一些属性的定义，方便下面的配置重复使用如：${LOG_HOME} -->
+    <properties>
+        <property name="LOG_HOME">logs/sys</property>
+        <property name="FILE_NAME">runtime</property>
+    </properties>
+
+    <Appenders>
+        <!-- 输出控制台，总共有3个属性
+             name：Appender的名字
+             target：SYSTEM_OUT 或 SYSTEM_ERR，默认是SYSTEM_OUT
+             layout：如何格式化，如果没有默认是%m%n
+        -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%t] %d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n" />
+        </Console>
+
+
+
+        <!--
+             日志按规则输出到多个文件，只会保留几个日志文件。
+             name：Appender的名字
+             fileName：日志输出目的文件名
+             filePattern：指定打包的日志文件的格式，文件的压缩格式支持的后缀名：".gz",".zip",".bz2",".xz";
+             如果不想压缩的话就不用压缩文件格式结尾就行。
+             layout：如何格式化，如果没有默认是%m%n
+         -->
+        <RollingRandomAccessFile name="DataSource_RollingFile" fileName="${LOG_HOME}/DataSource.log"
+                                 filePattern="${LOG_HOME}/$${date:yyyy-MM}/DataSource-%d{yyyy-MM-dd}-%i.log.zip">
+            <!--控制当前append接收日志的最低级别-->
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout  charset="UTF-8"  pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"/>
+
+            <!--指定滚动日志的策略，就是什么时候进行新建日志文件输出日志.-->
+            <Policies>
+                <!-- 下面的几种日志打包压缩的方式可以同时配置多个规则，只要有一个满足，日志文件就会被压缩 -->
+                <!-- 基于时间来生成压缩文件，interval属性表示每隔多少个时间间隔，其单位为filePatten定义的文件日期最小单位
+                 下面的配置表示每隔一天生成一个压缩文件 -->
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <!-- 固定大小来压缩日志文件 -->
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <!-- 日志文件比当前jvm启动时间更早就会触发压缩日志文件
+                    <OnStartupTriggeringPolicy />
+                -->
+            </Policies>
+            <!--
+               用来指定同一个文件夹下最多有几个日志文件时开始删除最旧的，创建新的(通过max属性)
+               DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件，这里设置了100
+            -->
+            <DefaultRolloverStrategy max="100">
+                <!-- 日志文件保留的个数-->
+                <Delete basePath="${LOG_HOME}" maxDepth="3">
+                    <!-- 要删除的日志的名称匹配 -->
+                    <IfFileName glob="*/DataSource*.log.zip" />
+                    <!-- 保留文件的天数 -->
+                    <IfLastModified age="30d" />
+                    <!-- 保留文件的个数 -->
+                    <!--<IfAccumulatedFileCount  exceeds="10" />-->
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+
+
+        <RollingRandomAccessFile name="System_RollingFile" fileName="${LOG_HOME}/System.log"
+                                 filePattern="${LOG_HOME}/$${date:yyyy-MM}/System-%d{yyyy-MM-dd}-%i.log.zip">
+            <!--控制当前append接收日志的最低级别-->
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout  charset="UTF-8"  pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"/>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <!-- 固定大小来压缩日志文件 -->
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <!-- 日志文件比当前jvm启动时间更早就会触发压缩日志文件
+                    <OnStartupTriggeringPolicy />
+                -->
+            </Policies>
+            <DefaultRolloverStrategy max="120">
+                <!-- 日志文件保留的个数-->
+                <Delete basePath="${LOG_HOME}" maxDepth="3">
+                    <!-- 要删除的日志的名称匹配 -->
+                    <IfFileName glob="*/System*.log.zip" />
+                    <!-- 保留文件的天数 -->
+                    <IfLastModified age="30d" />
+                    <!-- 保留文件的个数 -->
+                    <!--<IfAccumulatedFileCount  exceeds="10" />-->
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile name="NetWork_RollingFile" fileName="${LOG_HOME}/NetWork.log"
+                                 filePattern="${LOG_HOME}/$${date:yyyy-MM}/NetWork-%d{yyyy-MM-dd}-%i.log.zip">
+            <!--控制当前append接收日志的最低级别-->
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout  charset="UTF-8"  pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"/>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <!-- 固定大小来压缩日志文件 -->
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <!-- 日志文件比当前jvm启动时间更早就会触发压缩日志文件
+                <OnStartupTriggeringPolicy />
+                -->
+            </Policies>
+            <DefaultRolloverStrategy max="120">
+                <!-- 日志文件保留的个数-->
+                <Delete basePath="${LOG_HOME}" maxDepth="3">
+                    <!-- 要删除的日志的名称匹配 -->
+                    <IfFileName glob="*/NetWork*.log.zip" />
+                    <!-- 保留文件的天数 -->
+                    <IfLastModified age="30d" />
+                    <!-- 保留文件的个数 -->
+                    <!--<IfAccumulatedFileCount  exceeds="10" />-->
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile name="Sql_RollingFile" fileName="${LOG_HOME}/ExecSql.log"
+                                 filePattern="${LOG_HOME}/$${date:yyyy-MM}/ExecSql-%d{yyyy-MM-dd}-%i.log.zip">
+            <!--控制当前append接收日志的最低级别-->
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout  charset="UTF-8"  pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"/>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <!-- 固定大小来压缩日志文件 -->
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <!-- 日志文件比当前jvm启动时间更早就会触发压缩日志文件
+                <OnStartupTriggeringPolicy />
+                -->
+            </Policies>
+            <DefaultRolloverStrategy max="120">
+                <!-- 日志文件保留的个数-->
+                <Delete basePath="${LOG_HOME}" maxDepth="3">
+                    <!-- 要删除的日志的名称匹配 -->
+                    <IfFileName glob="*/ExecSql*.log.zip" />
+                    <!-- 保留文件的天数 -->
+                    <IfLastModified age="30d" />
+                    <!-- 保留文件的个数 -->
+                    <!--<IfAccumulatedFileCount  exceeds="10" />-->
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile name="Async_RollingFile" fileName="${LOG_HOME}/Async.log"
+                                 filePattern="${LOG_HOME}/$${date:yyyy-MM}/Async-%d{yyyy-MM-dd}-%i.log.zip">
+            <!--控制当前append接收日志的最低级别-->
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout  charset="UTF-8"  pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"/>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <!-- 固定大小来压缩日志文件 -->
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <!-- 日志文件比当前jvm启动时间更早就会触发压缩日志文件
+                <OnStartupTriggeringPolicy />
+                -->
+            </Policies>
+            <DefaultRolloverStrategy max="120">
+                <!-- 日志文件保留的个数-->
+                <Delete basePath="${LOG_HOME}" maxDepth="3">
+                    <!-- 要删除的日志的名称匹配 -->
+                    <IfFileName glob="*/Async*.log.zip" />
+                    <!-- 保留文件的天数 -->
+                    <IfLastModified age="30d" />
+                    <!-- 保留文件的个数 -->
+                    <!--<IfAccumulatedFileCount  exceeds="10" />-->
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+        <!-- 日志发送邮件
+        <SMTP name="Mail"   subject="LOG4J2  ERROR LOG"
+              to="123456@qq.com"
+              from="abcd@163.com"
+              smtpUsername="abcd"
+              smtpPassword="12345"
+              smtpHost="SMTP.163.com"
+              smtpDebug="false"
+              smtpPort="25" bufferSize="100">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n" />
+        </SMTP>
+        -->
+        <!-- 日志写入数据库
+        <JDBC name="databaseAppender" tableName="testlog_log4j">
+            <ConnectionFactory class="com.kyle.testlog.util.ConnectionFactory" method="getDatabaseConnection" />
+            <Column name="project_name" pattern="testlog4j"/>
+            <Column name="create_date" pattern="%d{yyyy-MM-dd}"/>
+            <Column name="create_time" pattern="%d{yyyy-MM-dd HH:mm:ss}"/>
+            <Column name="log_level" pattern="%p" />
+            <Column name="category" pattern="%C" />
+            <Column name="file_name" pattern="%F" />
+            <Column name="thread_name" pattern="%t" />
+            <Column name="line" pattern="%L" />
+            <Column name="all_category" pattern="%l" />
+            <Column name="message" pattern="%message"/>
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+        </JDBC>
+        -->
+        <!--<Async name="FileAsyncAppender">-->
+            <!--<AppenderRef ref="File"/>-->
+        <!--</Async>-->
+
+        <Async name="RollingFileAsyncAppender">
+            <AppenderRef ref="Async_RollingFile"/>
+        </Async>
+        <!--<Async name="MailAsyncAppender">-->
+            <!--<AppenderRef ref="Mail"/>-->
+        <!--</Async>-->
+
+    </Appenders>
+
+    <Loggers>
+        <!--共有8个级别，按照从低到高为：All < Trace < Debug < Info < Warn < Error < Fatal < OFF.-->
+        <!--Root节点用来指定项目的根日志，如果没有单独指定Logger，那么就会默认使用该Root日志输出-->
+        <Root level="info">
+            <!--AppenderRef：Root的子节点，用来指定该日志输出到哪个Appender.-->
+            <AppenderRef ref="Console" />
+            <!-- <AppenderRef ref="FileAsyncAppender" />
+            <AppenderRef ref="RollingFileAsyncAppender" />
+            <AppenderRef ref="MailAsyncAppender" /> -->
+            <!--<AppenderRef ref="databaseAppender" />-->
+        </Root>
+        <!--
+         Logger节点用来单独指定日志的形式，比如要为指定包下的class指定不同的日志级别等
+         name:用来指定该Logger所适用的类或者类所在的包全路径,继承自Root节点.
+         -->
+        <!--<logger name="" level="DEBUG">-->
+            <!--&lt;!&ndash;　-->
+            <!--AppenderRef：Logger的子节点，用来指定该日志输出到哪个Appender,如果没有指定，-->
+            <!--就会默认继承自Root.如果指定了，那么会在指定的这个Appender和Root的Appender中都会输出，-->
+            <!--此时我们可以设置Logger的additivity="false"只在自定义的Appender中进行输出。&ndash;&gt;-->
+            <!--<AppenderRef ref="" additivity="false"/>-->
+        <!--</logger>-->
+
+        <!-- 自定义logger
+            name：如果定义为包名或者类名则匹配的时候会对应包下的类中的日志，
+                                                如果自己随便定义则可以通过LogManager.getLogger("definedLogger")来获取
+            level:日志级别，和appender中的日志级别取交集
+            additivity：是否继承root  默认是true;如果为true则如果该logger与root有相同的appender，则会相同的日志输出两遍
+         -->
+        <!--<Logger name="definedLogger" level="ERROR" additivity="true">-->
+            <!--<AppenderRef ref="FileAsyncAppender" />-->
+            <!--<AppenderRef ref="RollingFileAsyncAppender" />-->
+        <!--</Logger>-->
+
+
+        <!--数据源的日志-->
+        <Logger name="druid.sql" level="debug" additivity="false">
+            <AppenderRef ref="Sql_RollingFile" />
+        </Logger>
+        <Logger name="druid.sql.Statement" level="info" additivity="false">
+            <AppenderRef ref="Sql_RollingFile" />
+        </Logger>
+        <Logger name="druid.sql.ResultSet" level="warn" additivity="false">
+            <AppenderRef ref="Sql_RollingFile" />
+        </Logger>
+
+        <Logger name="druid.sql.DataSource" level="info" additivity="false">
+            <AppenderRef ref="DataSource_RollingFile" />
+        </Logger>
+        <Logger name="com.alibaba.druid.pool" level="info" additivity="false">
+            <AppenderRef ref="DataSource_RollingFile" />
+        </Logger>
+
+        <Logger name="druid.sql.Connection" level="info" additivity="false">
+            <AppenderRef ref="DataSource_RollingFile" />
+        </Logger>
+
+        <Logger name="com.znjt.dao" level="debug" additivity="false">
+            <AppenderRef ref="Sql_RollingFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="com.znjt.rpc" level="info" additivity="false">
+            <AppenderRef ref="Sql_RollingFile" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="com.znjt.rpc.ImageUpLoadProcssor" level="info" additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+    </Loggers>
+
+</Configuration>

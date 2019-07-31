@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.znjt.dao.mapper.ACCTransferBeanMapper">
+
+    <!--客户端 begin-->
+    <!--获取没有上传的记录-->
+    <select id="findUnUpLoadACCRecordDatas" resultType="ACCTransferIniBean" useCache="false">
+        select * from acc where uploadstatus = 0 limit 0,#{pageSize}
+    </select>
+
+    <!--更新刚刚更新成功的记录的状态-->
+    <update id="updateCurrentUpLoadedSuccessACCRescords">
+        update acc set UPLOADSTATUS = 1 where
+        <foreach collection="list" item="item" separator="," open=" id in (" close=")" >
+            #{item.id}
+        </foreach>
+    </update>
+
+    <!--客户端 end-->
+
+
+    <!--服务器端 begin-->
+    <insert id="upLoadACCRecordDatas2UpStream"  >
+        insert into acc (status,accid,date,time,acc1x,acc1y,acc1z,acc2x,acc2y,acc2z)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.status},#{item.accid},#{item.date},#{item.time},#{item.acc1x},
+            #{item.acc1y},#{item.acc1z},#{item.acc2x},#{item.acc2y},
+            #{item.acc2z})
+        </foreach>
+        ON DUPLICATE KEY UPDATE accid = values(accid)
+    </insert>
+</mapper>

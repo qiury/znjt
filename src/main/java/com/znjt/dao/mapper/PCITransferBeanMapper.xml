@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.znjt.dao.mapper.PCITransferBeanMapper">
+
+    <!--客户端 begin-->
+    <!--获取没有上传的记录-->
+    <select id="findUnUpLoadPCIRecordDatas" resultType="PCITransferIniBean" useCache="false">
+        select * from pci where uploadstatus = 0 limit 0,#{pageSize}
+    </select>
+
+    <!--更新刚刚更新成功的记录的状态-->
+    <update id="updateCurrentUpLoadedSuccessPCIRescords">
+        update pci set UPLOADSTATUS = 1 where
+        <foreach collection="list" item="item" separator="," open=" id in (" close=")" >
+            #{item.id}
+        </foreach>
+    </update>
+    <!--客户端 end-->
+
+
+    <!--服务器端 begin-->
+    <insert  id="upLoadPICRecordDatas2UpStream"  >
+        insert into pci (pcigpsid,gpsid,collect_time,start_latitude,start_longitude,end_latitude,end_longitude,pci_value,
+        distance,status,azimuth,crack_num,patchcrack_num,pothole_num,patchpothole_num,net_num,patchnet_num,dataid)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.pcigpsid},#{item.gpsid},#{item.collect_time},#{item.start_latitude},#{item.start_longitude},
+            #{item.end_latitude},#{item.end_longitude},#{item.pci_value},#{item.distance},
+            #{item.status},#{item.azimuth},#{item.crack_num},#{item.patchcrack_num},
+            #{item.pothole_num},#{item.patchpothole_num},#{item.net_num},#{item.patchnet_num},#{item.dataId})
+        </foreach>
+        ON DUPLICATE KEY UPDATE dataid = values(dataid)
+    </insert>
+
+</mapper>

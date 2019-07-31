@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!-- 加载外部的资源文件 -->
+    <properties resource="db/jdbc.properties"/>
+    <settings>
+        <!--全局性设置懒加载。如果设为‘false’，则所有相关联的都会被初始化加载。默认为false-->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <!--
+            mybatis加载关联对象的三种方式：
+            1. 立即加载；
+            2. 深度延迟加载：只有访问关联对象时才会触发加载；
+            3. 侵入式延迟加载：对主对象任何属性的访问都会触发关联对象的加载；
+
+            aggressive：侵入、侵犯
+            如果为true（侵入式延迟加载），表示在 lazyLoadingEnabled 开启的情况下，
+            访问主对象的属性也会触发关联对象的查询动作，也就是把关联对象当做普通属性一样，
+            只要访问主对象任何属性信息都会触发关联属性的查询。
+
+            一般设置为false，只有主动性访问管理对象时才会触发加载（也就是深度延迟）
+            aggressiveLazyLoading：在lazyLoadingEnabled为true时，这个参数才有意义。
+        -->
+        <setting name="aggressiveLazyLoading" value="false"/>
+        <!--全局是否开启二级缓存，默认为true-->
+        <setting name="cacheEnabled" value="false"/>
+
+        <!--驼峰命名自动匹配，默认是false表示没有开启-->
+        <setting name="mapUnderscoreToCamelCase" value="false" />
+        <!--打印sql到控制台-->
+        <setting name="logImpl" value="STDOUT_LOGGING" />
+
+        <!--<setting name="logPrefix" value="mybatis.sql."/>-->
+        <setting name="logImpl" value="SLF4J"/>
+        <!--mybatis默认处理null，映射为JdbcType的OTHER类型，这个类型oracle是不支持的，
+        MySQL是支持的，这里设置为JdbcType中的NULL类型，数据都支持NULL类型-->
+        <setting name="jdbcTypeForNull" value="NULL" />
+        <!--以秒为单位的全局sql超时时间设置,当超出了设置的超时时间时,会抛出SQLTimeoutException-->
+        <setting name="defaultStatementTimeout" value="120"/>
+
+    </settings>
+    <!--定义别名-->
+    <typeAliases>
+        <!--单个指定，不常用-->
+        <!--<typeAlias type="" alias=""/>-->
+
+        <!--
+          将指定包及其子包中的所有类，使用简单类名作为别名（别名是不区分大小写）
+          注意：如果缺省情况下出现同名的别名，可以在其中一个上使用@Aliase注解typeAlias标签单独设置别名解决冲突
+        -->
+        <package name="com.znjt.dao.beans" />
+    </typeAliases>
+
+    <!-- 声明数据连接环境 -->
+    <environments default="master">
+        <environment id="master">
+            <transactionManager type="JDBC" />
+            <!--
+            dataSource type=：
+            mybatis提供给了unpooled和pooled数据源，
+            这些数据源都是实现mybatis的DatasourceFacotory接口的。
+            我们只要实现DataSourceFacotry接口的方法，提供自己数据源就可以实现自定义数据源了
+            -->
+            <dataSource type="com.znjt.datasource.DefineDataSourceFactory">
+                <property name="druid.driver" value="${druid.driver}"/>
+                <property name="druid.url" value="${db_master.url}"/>
+                <property name="druid.username" value="${db_master.username}"/>
+                <property name="druid.password" value="${db_master.password}"/>
+                <property name="druid.initialSize" value="${druid.initialSize}"/>
+                <property name="druid.maxActive" value="${druid.maxActive}"/>
+                <property name="maxWait" value="${druid.maxWait}"/>
+                <property name="druid.useUnfairLock" value="${druid.useUnfairLock}"/>
+                <property name="druid.timeBetweenEvictionRunsMillis" value="${druid.timeBetweenEvictionRunsMillis}"/>
+                <property name="druid.minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}"/>
+                <property name="druid.testOnBorrow" value="${druid.testOnBorrow}"/>
+                <property name="druid.testOnReturn" value="${druid.testOnReturn}"/>
+                <property name="druid.testWhileIdle" value="${druid.testWhileIdle}"/>
+                <property name="druid.validationQuery" value="${druid.validationQuery}"/>
+                <property name="druid.poolPreparedStatements" value="${druid.poolPreparedStatements}"/>
+                <property name="druid.maxPoolPreparedStatementPerConnectionSize" value="${druid.maxPoolPreparedStatementPerConnectionSize}"/>
+
+                <property name="druid.removeAbandoned" value="${druid.removeAbandoned}"/>
+                <property name="druid.removeAbandonedTimeout" value="${druid.removeAbandonedTimeout}"/>
+                <property name="druid.logAbandoned" value="${druid.logAbandoned}"/>
+                <property name="druid.maxIdle" value="${druid.maxIdle}"/>
+                <property name="druid.minIdle" value="${druid.minIdle}"/>
+
+                <property name="druid.failFast" value="${druid.failFast}"/>
+                <property name="druid.connectionErrorRetryAttempts" value="${druid.connectionErrorRetryAttempts}"/>
+                <property name="druid.breakAfterAcquireFailure" value="${druid.breakAfterAcquireFailure}"/>
+                <property name="druid.timeBetweenConnectErrorMillis" value="${druid.timeBetweenConnectErrorMillis}"/>
+
+            </dataSource>
+        </environment>
+        <environment id="slave">
+            <transactionManager type="JDBC" />
+            <!--
+            dataSource type=：
+            mybatis提供给了unpooled和pooled数据源，
+            这些数据源都是实现mybatis的DatasourceFacotory接口的。
+            我们只要实现DataSourceFacotry接口的方法，提供自己数据源就可以实现自定义数据源了
+            -->
+            <dataSource type="com.znjt.datasource.DefineDataSourceFactory">
+                <property name="druid.driver" value="${druid.driver}"/>
+                <property name="druid.url" value="${db_slave.url}"/>
+                <property name="druid.username" value="${db_slave.username}"/>
+                <property name="druid.password" value="${db_slave.password}"/>
+                <property name="druid.initialSize" value="${druid.initialSize}"/>
+                <property name="druid.maxActive" value="${druid.maxActive}"/>
+                <property name="maxWait" value="${druid.maxWait}"/>
+                <property name="druid.useUnfairLock" value="${druid.useUnfairLock}"/>
+                <property name="druid.timeBetweenEvictionRunsMillis" value="${druid.timeBetweenEvictionRunsMillis}"/>
+                <property name="druid.minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}"/>
+                <property name="druid.testOnBorrow" value="${druid.testOnBorrow}"/>
+                <property name="druid.testOnReturn" value="${druid.testOnReturn}"/>
+                <property name="druid.testWhileIdle" value="${druid.testWhileIdle}"/>
+                <property name="druid.validationQuery" value="${druid.validationQuery}"/>
+                <property name="druid.poolPreparedStatements" value="${druid.poolPreparedStatements}"/>
+                <property name="druid.maxPoolPreparedStatementPerConnectionSize" value="${druid.maxPoolPreparedStatementPerConnectionSize}"/>
+
+                <property name="druid.removeAbandoned" value="${druid.removeAbandoned}"/>
+                <property name="druid.removeAbandonedTimeout" value="${druid.removeAbandonedTimeout}"/>
+                <property name="druid.logAbandoned" value="${druid.logAbandoned}"/>
+                <property name="druid.maxIdle" value="${druid.maxIdle}"/>
+                <property name="druid.minIdle" value="${druid.minIdle}"/>
+
+                <property name="druid.failFast" value="${druid.failFast}"/>
+                <property name="druid.connectionErrorRetryAttempts" value="${druid.connectionErrorRetryAttempts}"/>
+                <property name="druid.breakAfterAcquireFailure" value="${druid.breakAfterAcquireFailure}"/>
+                <property name="druid.timeBetweenConnectErrorMillis" value="${druid.timeBetweenConnectErrorMillis}"/>
+
+            </dataSource>
+        </environment>
+
+        <environment id="db03">
+            <transactionManager type="JDBC" />
+            <!--
+            dataSource type=：
+            mybatis提供给了unpooled和pooled数据源，
+            这些数据源都是实现mybatis的DatasourceFacotory接口的。
+            我们只要实现DataSourceFacotry接口的方法，提供自己数据源就可以实现自定义数据源了
+            -->
+            <dataSource type="com.znjt.datasource.DefineDataSourceFactory">
+                <property name="druid.driver" value="${druid.driver}"/>
+                <property name="druid.url" value="${db03.url}"/>
+                <property name="druid.username" value="${db03.username}"/>
+                <property name="druid.password" value="${db03.password}"/>
+                <property name="druid.initialSize" value="${druid.initialSize}"/>
+                <property name="druid.maxActive" value="${druid.maxActive}"/>
+                <property name="maxWait" value="${druid.maxWait}"/>
+                <property name="druid.useUnfairLock" value="${druid.useUnfairLock}"/>
+                <property name="druid.timeBetweenEvictionRunsMillis" value="${druid.timeBetweenEvictionRunsMillis}"/>
+                <property name="druid.minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}"/>
+                <property name="druid.testOnBorrow" value="${druid.testOnBorrow}"/>
+                <property name="druid.testOnReturn" value="${druid.testOnReturn}"/>
+                <property name="druid.testWhileIdle" value="${druid.testWhileIdle}"/>
+                <property name="druid.validationQuery" value="${druid.validationQuery}"/>
+                <property name="druid.poolPreparedStatements" value="${druid.poolPreparedStatements}"/>
+                <property name="druid.maxPoolPreparedStatementPerConnectionSize" value="${druid.maxPoolPreparedStatementPerConnectionSize}"/>
+
+                <property name="druid.removeAbandoned" value="${druid.removeAbandoned}"/>
+                <property name="druid.removeAbandonedTimeout" value="${druid.removeAbandonedTimeout}"/>
+                <property name="druid.logAbandoned" value="${druid.logAbandoned}"/>
+                <property name="druid.maxIdle" value="${druid.maxIdle}"/>
+                <property name="druid.minIdle" value="${druid.minIdle}"/>
+
+                <property name="druid.failFast" value="${druid.failFast}"/>
+                <property name="druid.connectionErrorRetryAttempts" value="${druid.connectionErrorRetryAttempts}"/>
+                <property name="druid.breakAfterAcquireFailure" value="${druid.breakAfterAcquireFailure}"/>
+                <property name="druid.timeBetweenConnectErrorMillis" value="${druid.timeBetweenConnectErrorMillis}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!--
+        解决的问题：
+            当系统可能面对不同的数据库，数据对sql的尺寸存在差异，就需要根据不同的数据库发送不同的sql语句。
+
+        DB_VENDOR是一个别名，对应的VendorDataBaseIdProvider处理类，它的作用
+        就是从数据库驱动中获取数据库厂商的信息，提供给mybatis使用。
+
+        在mapper文件中的标签中，通过databaseId设置该条语句对应的数据库类型。
+        mybatis在匹配statement时，首先根据databaseId进行精确匹配，如果没有设置databaseId
+        就根据statementid进行匹配。
+    -->
+    <databaseIdProvider type="DB_VENDOR">
+        <!--为不同厂商的信息起别名，方面后面使用-->
+        <property name="MySQL" value="mysql"/>
+        <property name="Oracle" value="oracle"/>
+    </databaseIdProvider>
+    <mappers>
+        <!--指定接口的名称（主要用于配置具有注解映射的接口）
+           1. 如果存在mapper配置文件，要求mapper配置文件的名称和接口名称相同，且要放在同一目录下
+           2. 在接口的方法使用注解的方式配置sql映射信息。
+           -->
+        <!--<mapper class=""/>-->
+
+        <!--指定mapper文件的路径-->
+        <!--<mapper resource=""/>-->
+
+        <!--
+            <package name="映射文件所在包名">
+            注意：
+            这种方式必须保证接口名和mapper namespace=""名相同，xml文件名称和接口名称是否相同相同没有关系。
+            也不要求接口文件和mapper文件在同一个目录下。
+
+            Mapper配置文件就是通过namespace值和接口进行匹配的。
+        -->
+        <package name="com.znjt.dao.mapper"/>
+    </mappers>
+</configuration>

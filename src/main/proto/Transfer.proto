@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package com.znjt.proto;
+
+option java_package = "com.znjt.proto";
+
+option java_outer_classname = "TransferProto";
+//每个消息生成一个文件
+option java_multiple_files = true;
+option optimize_for= SPEED;
+
+service TransferService{
+    rpc transporterByStream(stream SyncDataRequest) returns (stream SyncDataResponse){}
+
+    rpc transporterBySync(SyncDataRequest) returns (SyncDataResponse){}
+
+    rpc transporterBySyncTest(SyncDataRequest) returns (SyncDataResponse){}
+
+    rpc transporterMulBySync(SyncMulImgRequest) returns (SyncMulImgResponse){}
+
+    rpc transporterMulSingleBySync(SyncMulSingleImgRequest) returns (SyncMulSingleImgResponse){}
+}
+
+enum DataType{
+    T_INI = 0;
+    T_GPS = 1;
+    T_GPS_SINGLE = 2;
+    T_GPS_SINGLE_TEST = 3;
+}
+
+
+
+//请求响应对象
+message SyncMulImgResponse{
+    DataType data_type = 1;
+    repeated GPSRecord gps_record = 3;
+}
+
+message SyncMulImgRequest{
+    DataType data_type = 1;
+    repeated GPSRecord gps_record = 3;
+}
+
+//请求响应对象
+message SyncMulSingleImgResponse{
+    DataType data_type = 1;
+    repeated GPSSingleRecord gps_single_record = 2;
+}
+
+message SyncMulSingleImgRequest{
+    DataType data_type = 1;
+    repeated GPSSingleRecord gps_single_record = 2;
+}
+
+
+
+message SyncDataRequest{
+    DataType data_type = 1;
+    oneof record{
+        INIRecord ini_record = 2;
+        GPSRecord gps_record = 3;
+    }
+
+}
+
+//请求响应对象
+message SyncDataResponse{
+    DataType data_type = 1;
+    oneof record{
+        INIRecord ini_record = 2;
+        GPSRecord gps_record = 3;
+    }
+}
+
+//INI表元数据
+message INIRecord{
+    string client_record_id = 1;
+    string dataId = 2;
+    bool serv_ops_res = 3;
+}
+
+message GPSRecord{
+    string client_record_id = 1;
+    string dataId = 2;
+    bool serv_ops_res = 3;
+    repeated bytes img_data = 4 ;
+    bool file_err = 5;
+    int32 losted_size = 6;
+    repeated string file_names = 7 ;
+}
+
+message GPSSingleRecord{
+    string client_record_id = 1;
+    string dataId = 2;
+    bool serv_ops_res = 3;
+    bytes img_data = 4;
+    bool file_err = 5;
+    string file_name = 6;
+}

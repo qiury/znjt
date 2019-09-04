@@ -198,9 +198,9 @@ public class ClientBoot {
                 //手工指定图像路径，不需要执行图像上传任务，只需要执行图像路径同步即可
                 start_gps_img_path_jobs();
             }
-            start_acc_jobs();
-            start_pci_jobs();
-            start_iri_jobs();
+//            start_acc_jobs();
+//            start_pci_jobs();
+//            start_iri_jobs();
         }
     }
 
@@ -706,7 +706,7 @@ public class ClientBoot {
         //List<GPSTransferIniBean> recordDatas = gpsTransferService.findUnUpLoadGPSImgDatas(Boot.DOWNSTREAM_DBNAME, Boot.IMAGE_BATCH_SIZE*2);
         List<GPSTransferIniBean> recordDatas = null;
         try {
-            recordDatas = gpsTransferService.findUnUpLoadGPSImgDatas4EvenOrOdd(Boot.DOWNSTREAM_DBNAME, Boot.IMAGE_BATCH_SIZE * 2, even ? 0 : 1);
+            recordDatas = gpsTransferService.findUnUpLoadGPSImgDatas4EvenOrOdd(Boot.DOWNSTREAM_DBNAME, Boot.IMAGE_BATCH_SIZE, even ? 0 : 1);
             if (recordDatas != null && recordDatas.size() > 0) {
                 GPS_IMG_JOB_START_ID = recordDatas.get(0).getId();
             } else {

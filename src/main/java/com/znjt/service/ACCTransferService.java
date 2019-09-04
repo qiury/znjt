@@ -60,5 +60,31 @@ public class ACCTransferService {
         });
         return dao.upLoadACCRecordDatas2UpStream(dbname, accTransferIniBeans);
     }
+    /**
+     * @Desc: 获取本次任务的所有记录总数
+     * @param dbname
+     * @param id
+     * @return: long
+     * @Author: qiuzx
+     * @Date: 2019-08-30
+     * @Copyright 2019-2020 BTT - Powered By 研发中心
+     * @version V1.0
+     */
+    public long findTotalJobs(String dbname, long id) {
+        return dao.findTotalJobs(dbname,id);
+    }
+
+    /**
+     * @Desc: 获取所有尚未上传的记录总是
+     * @param dbname
+     * @return: long
+     * @Author: qiuzx
+     * @Date: 2019-08-30
+     * @Copyright 2019-2020 BTT - Powered By 研发中心
+     * @version V1.0
+     */
+    public long findUnUpLoadACCRecords(String dbname) {
+        return dao.findUnUpLoadACCRecords(dbname);
+    }
 
 }

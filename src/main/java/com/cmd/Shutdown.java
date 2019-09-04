@@ -96,4 +96,17 @@ public class Shutdown {
         }
         return new String(chs);
     }
+
+    public static String getPercentProgress(String pre,int percent){
+        StringBuilder sb = new StringBuilder(pre+"已上传：");
+        if(percent!=0){
+            for (int i = 0; i < percent; i++) {
+                sb.append("#");
+            }
+            sb.append(" ");
+        }
+        //sb.append(getBackspaces(sb.length()));
+        sb.append(percent+"%").append('\r');
+        return sb.toString();
+    }
 }

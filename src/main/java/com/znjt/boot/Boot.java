@@ -50,6 +50,10 @@ public class Boot {
     private static String[] EXTEND_TABLES = null;
     private static boolean test_upload_speed = false;
     public static boolean save_test_file_to_disk = false;
+
+    //人工指定图像路径
+    public static boolean assign_imgs_path_by_manual = false;
+
     public static final String BASE_DIR = CommonFileUitls.getProjectPath();
 
     private static ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.SECONDS, new ArrayBlockingQueue(1));
@@ -205,6 +209,11 @@ public class Boot {
             param = prop.getProperty("auto_off_os");
             if (StringUtils.isNotBlank(param)) {
                 ClientBoot.auto_off_os = Boolean.parseBoolean(param.trim());
+            }
+
+            param = prop.getProperty("assign_imgs_path_by_manual");
+            if(StringUtils.isNoneBlank(param)){
+                assign_imgs_path_by_manual = Boolean.parseBoolean(param);
             }
         });
     }

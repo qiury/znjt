@@ -6,8 +6,21 @@
     <!--客户端 begin-->
     <!--获取没有上传的记录-->
     <select id="findUnUpLoadACCRecordDatas" resultType="ACCTransferIniBean" useCache="false">
-        select * from acc where uploadstatus = 0 limit 0,#{pageSize}
+        select * from acc where uploadstatus = 0 order by id limit 0,#{pageSize}
     </select>
+
+
+    <!--获取大于第一条操作记录的总记录数-->
+    <select id="findTotalJobs" resultType="java.lang.Long">
+        select count(1) from acc where id >= #{id}
+    </select>
+
+
+    <!--获取所有未上传的记录数-->
+    <select id="findUnUpLoadACCRecords" resultType="java.lang.Long">
+         select count(1) from acc where uploadstatus = 0
+    </select>
+
 
     <!--更新刚刚更新成功的记录的状态-->
     <update id="updateCurrentUpLoadedSuccessACCRescords">

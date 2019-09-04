@@ -80,7 +80,6 @@ public class GPSTransferDao {
     }
 
     public void updateCurrentUploadedSuccessGPSImgRecords(String dbname,List<GPSTransferIniBean> gpsTransferIniBeans) {
-        List<GPSTransferIniBean> recordDatas = null;
         try {
             SqlSession sqlSession = EnhanceMapperFactory.getMultiSqlSession(dbname, false);
             GPSTransferBeanMapper mapper = EnhanceMapperFactory.createMapper(GPSTransferBeanMapper.class, sqlSession);
@@ -120,6 +119,7 @@ public class GPSTransferDao {
         return updated;
     }
 
+
     public void updateBatchGPSImgPath2DBRecord(String dbname,List<GPSTransferIniBean> gpsTransferIniBeans){
         try {
             SqlSession sqlSession = EnhanceMapperFactory.getMultiSqlSession(dbname, false);
@@ -129,5 +129,76 @@ public class GPSTransferDao {
         } finally {
             EnhanceDbUtils.closeSession();
         }
+    }
+
+
+    public long findTotalJobs(String dbname,long id){
+        long res = -1;
+        try {
+            SqlSession sqlSession = EnhanceMapperFactory.getMultiSqlSession(dbname, true);
+            GPSTransferBeanMapper mapper = EnhanceMapperFactory.createMapper(GPSTransferBeanMapper.class, sqlSession);
+            res = mapper.findTotalJobs(id);
+        } finally {
+            EnhanceDbUtils.closeSession();
+        }
+        return res;
+    }
+
+    public long findUnUpLoadGPSRecords(String dbname){
+        long res = -1;
+        try {
+            SqlSession sqlSession = EnhanceMapperFactory.getMultiSqlSession(dbname, true);
+            GPSTransferBeanMapper mapper = EnhanceMapperFactory.createMapper(GPSTransferBeanMapper.class, sqlSession);
+            res = mapper.findUnUpLoadGPSRecords();
+        } finally {
+            EnhanceDbUtils.closeSession();
+        }
+        return res;
+    }
+    public long findTotalJobsOnCondition(String dbname,long id){
+        long res = -1;
+        try {
+            SqlSession sqlSession = EnhanceMapperFactory.getMultiSqlSession(dbname, true);
+            GPSTransferBeanMapper mapper = EnhanceMapperFactory.createMapper(GPSTransferBeanMapper.class, sqlSession);
+            res = mapper.findTotalJobsOnCondition(id);
+        } finally {
+            EnhanceDbUtils.closeSession();
+        }
+        return res;
+    }
+
+    public long findUnUpLoadGPSRecordsOnCondition(String dbname){
+        long res = -1;
+        try {
+            SqlSession sqlSession = EnhanceMapperFactory.getMultiSqlSession(dbname, true);
+            GPSTransferBeanMapper mapper = EnhanceMapperFactory.createMapper(GPSTransferBeanMapper.class, sqlSession);
+            res = mapper.findUnUpLoadGPSRecordsOnCondition();
+        } finally {
+            EnhanceDbUtils.closeSession();
+        }
+        return res;
+    }
+
+    public long findTotalImgJobs(String dbname,long id){
+        long res = -1;
+        try {
+            SqlSession sqlSession = EnhanceMapperFactory.getMultiSqlSession(dbname, true);
+            GPSTransferBeanMapper mapper = EnhanceMapperFactory.createMapper(GPSTransferBeanMapper.class, sqlSession);
+            res = mapper.findTotalImgJobs(id);
+        } finally {
+            EnhanceDbUtils.closeSession();
+        }
+        return res;
+    }
+    public long findUnUpLoadGPSImgRecords(String dbname){
+        long res = -1;
+        try {
+            SqlSession sqlSession = EnhanceMapperFactory.getMultiSqlSession(dbname, true);
+            GPSTransferBeanMapper mapper = EnhanceMapperFactory.createMapper(GPSTransferBeanMapper.class, sqlSession);
+            res = mapper.findUnUpLoadGPSImgRecords();
+        } finally {
+            EnhanceDbUtils.closeSession();
+        }
+        return res;
     }
 }

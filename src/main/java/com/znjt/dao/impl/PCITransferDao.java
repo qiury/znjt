@@ -49,4 +49,28 @@ public class PCITransferDao {
             EnhanceDbUtils.closeSession();
         }
     }
+    //根据id查询共计有多少条记录
+    public long findTotalJobs(String dbname,long id){
+        long res = -1;
+        try {
+            SqlSession sqlSession = EnhanceMapperFactory.getMultiSqlSession(dbname, true);
+            PCITransferBeanMapper mapper = EnhanceMapperFactory.createMapper(PCITransferBeanMapper.class, sqlSession);
+            res = mapper.findTotalJobs(id);
+        } finally {
+            EnhanceDbUtils.closeSession();
+        }
+        return res;
+    }
+
+    public long findUnUpLoadPCIRecords(String dbname){
+        long res = -1;
+        try {
+            SqlSession sqlSession = EnhanceMapperFactory.getMultiSqlSession(dbname, true);
+            PCITransferBeanMapper mapper = EnhanceMapperFactory.createMapper(PCITransferBeanMapper.class, sqlSession);
+            res = mapper.findUnUpLoadPCIRecords();
+        } finally {
+            EnhanceDbUtils.closeSession();
+        }
+        return res;
+    }
 }

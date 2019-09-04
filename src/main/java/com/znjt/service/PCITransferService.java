@@ -2,7 +2,12 @@ package com.znjt.service;
 
 import com.znjt.dao.beans.PCITransferIniBean;
 import com.znjt.dao.impl.PCITransferDao;
+import com.znjt.dao.mapper.PCITransferBeanMapper;
+import com.znjt.datasource.enhance.EnhanceDbUtils;
+import com.znjt.datasource.enhance.EnhanceMapperFactory;
+import org.apache.ibatis.session.SqlSession;
 
+import java.lang.annotation.Retention;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -55,6 +60,14 @@ public class PCITransferService {
             });
             dao.upLoadPCIRecordDatas2UpStream(dbname, rds);
         });
+    }
+    //根据id查询共计有多少条记录
+    public long findTotalJobs(String dbname,long id){
+        return dao.findTotalJobs(dbname, id);
+    }
+
+    public long findUnUpLoadPCIRecords(String dbname){
+        return dao.findUnUpLoadPCIRecords(dbname);
     }
 
 }

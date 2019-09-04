@@ -6,7 +6,16 @@
     <!--客户端 begin-->
     <!--获取没有上传的记录-->
     <select id="findUnUpLoadIRIRecordDatas" resultType="IRITransferIniBean" useCache="false">
-        select * from iri where uploadstatus = 0 limit 0,#{pageSize}
+        select * from iri where uploadstatus = 0 order by id limit 0,#{pageSize}
+    </select>
+
+
+    <select id="findTotalJobs" resultType="java.lang.Long">
+        select count(1) from iri where id >=#{id}
+    </select>
+
+    <select id="findUnUpLoadIRIRecords" resultType="java.lang.Long">
+        select count(1) from iri where uploadstatus = 0
     </select>
 
     <!--更新刚刚更新成功的记录的状态-->

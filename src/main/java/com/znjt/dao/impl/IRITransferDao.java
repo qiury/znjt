@@ -49,4 +49,29 @@ public class IRITransferDao {
             EnhanceDbUtils.closeSession();
         }
     }
+
+    //根据id查询共计有多少条记录
+    public long findTotalJobs(String dbname,long id){
+        long res = -1;
+        try {
+            SqlSession sqlSession = EnhanceMapperFactory.getMultiSqlSession(dbname, false);
+            IRITransferBeanMapper mapper = EnhanceMapperFactory.createMapper(IRITransferBeanMapper.class, sqlSession);
+            res = mapper.findTotalJobs(id);
+        }  finally {
+            EnhanceDbUtils.closeSession();
+        }
+        return res;
+    }
+
+    public long findUnUpLoadIRIRecords(String dbname){
+        long res = -1;
+        try {
+            SqlSession sqlSession = EnhanceMapperFactory.getMultiSqlSession(dbname, false);
+            IRITransferBeanMapper mapper = EnhanceMapperFactory.createMapper(IRITransferBeanMapper.class, sqlSession);
+            res = mapper.findUnUpLoadIRIRecords();
+        }  finally {
+            EnhanceDbUtils.closeSession();
+        }
+        return res;
+    }
 }

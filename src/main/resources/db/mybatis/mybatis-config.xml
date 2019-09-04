@@ -28,9 +28,9 @@
 
         <!--驼峰命名自动匹配，默认是false表示没有开启-->
         <setting name="mapUnderscoreToCamelCase" value="false" />
-        <!--打印sql到控制台-->
+        <!--打印sql到控制台
         <setting name="logImpl" value="STDOUT_LOGGING" />
-
+        -->
         <!--<setting name="logPrefix" value="mybatis.sql."/>-->
         <setting name="logImpl" value="SLF4J"/>
         <!--mybatis默认处理null，映射为JdbcType的OTHER类型，这个类型oracle是不支持的，

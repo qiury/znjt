@@ -155,6 +155,27 @@ public class TransporterClientProxy {
 //    }
 
     /**
+     * 同步批量上传图像路径数据
+     *
+     * @param datas
+     */
+    public void transferImagePathData(List<GPSTransferIniBean> datas) {
+        if (datas != null && datas.size() > 0) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("开始组织需要上传的[" + datas.size() + "]含图像路径的记录给服务器");
+            }
+        }
+
+        gpsTransferService.updateBatchGPSImgPath2DBRecord(Boot.UPSTREAM_DBNAME,datas);
+
+        datas.forEach(item->{
+            item.setImg_uploaded(true);
+        });
+
+        gpsTransferService.updateCurrentUploadedSuccessGPSImgRecords(Boot.DOWNSTREAM_DBNAME, datas);
+    }
+
+    /**
      * 同步批量上传数据
      *
      * @param datas
@@ -475,18 +496,20 @@ public class TransporterClientProxy {
     }
 
     private GPSRecord createGPSRecordBean(GPSTransferIniBean item) {
+
         String data_id = getDataid(item);
         String file_path = item.getOriginalUrl();
         String base_path = item.getBaseDir();
-
         String[] file_paths = null;
+
+        List<byte[]> imgs = null;
+        List<String> fileNames = null;
+
         if (StringUtils.isNotBlank(file_path)) {
             file_path = file_path.replaceAll("(\r\n|\r|\n|\n\r)", "");
             //多个路径是通过;分割的
             file_paths = file_path.split(";");
         }
-        List<byte[]> imgs = null;
-        List<String> fileNames = null;
         if (file_paths != null) {
             MultiImageInfoBean multiImageInfoBean = getEachImgDatas(data_id, base_path, file_paths);
             fileNames = multiImageInfoBean.getFileNames();

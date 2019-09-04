@@ -3,6 +3,7 @@ package com.znjt.rpc;
 import com.znjt.dao.beans.GPSTransferIniBean;
 import com.znjt.service.GPSTransferService;
 import com.znjt.thrift.GPSImgClient;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,45 @@ public class TransportClient {
 
     public void uploadBigDataByRPC(String filePath) {
         transporterClientProxy.transferData2ServerBySync(filePath);
+    }
+
+
+    /**
+     * 是否通过流的方式上传图像（优点，具有数据去重功能。缺点，效率比批处理低）
+     * @param gpsTransferIniBeans
+
+     */
+    public void uploadImgDataPath(List<GPSTransferIniBean> gpsTransferIniBeans) {
+        if (gpsTransferIniBeans != null && gpsTransferIniBeans.size() > 0) {
+            gpsTransferIniBeans.forEach(item -> {
+                if (item.getDataid() == null) {
+                    item.setDataid(item.getStatus() + "&" + item.getGpsid());
+                }
+                //可能存在多个路径通过;分割
+                String paths = item.getOriginalUrl().replaceAll("(\r\n|\r|\n|\n\r)", "");
+                String[] pts = paths.split(";");
+                StringBuilder sb = new StringBuilder();
+                int index = 0;
+                String basePath = null;
+                for (String sub:pts){
+                    if(StringUtils.isNotBlank(sub)){
+                        if(index==0){
+                            //补充地址信息
+                            basePath = sub.substring(0, 2);
+                            item.setBaseDir(basePath);
+                        }
+                        index++;
+                        sb.append(sub.substring(2)).append(";");
+                    }
+                }
+                item.setOriginalUrl(sb.toString());
+            });
+            if(logger.isInfoEnabled()) {
+                logger.info("同步 {批量} 方式上传Image路径数据");
+            }
+            //通过同步批处理方式发送数据
+            transporterClientProxy.transferImagePathData(gpsTransferIniBeans);
+        }
     }
 
 

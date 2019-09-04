@@ -19,4 +19,8 @@ public interface PCITransferBeanMapper extends Mapper {
     List<PCITransferIniBean> findUnUpLoadPCIRecordDatas(int pageSize);
     void updateCurrentUpLoadedSuccessPCIRescords(List<PCITransferIniBean> pciTransferIniBeans);
     void upLoadPICRecordDatas2UpStream(List<PCITransferIniBean> iriTransferIniBeans);
+
+    //根据id查询共计有多少条记录
+    long findTotalJobs(long id);
+    long findUnUpLoadPCIRecords();
 }

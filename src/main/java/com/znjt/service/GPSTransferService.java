@@ -2,6 +2,10 @@ package com.znjt.service;
 
 import com.znjt.dao.beans.GPSTransferIniBean;
 import com.znjt.dao.impl.GPSTransferDao;
+import com.znjt.dao.mapper.GPSTransferBeanMapper;
+import com.znjt.datasource.enhance.EnhanceDbUtils;
+import com.znjt.datasource.enhance.EnhanceMapperFactory;
+import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.rmi.runtime.Log;
@@ -130,5 +134,28 @@ public class GPSTransferService {
         if(logger.isDebugEnabled()){
             logger.debug("Server 批量更新 ["+gpsTransferIniBeans.size()+"]条图像上传路径记录到数据耗时：" + Duration.between(begin,Instant.now()).toMillis() + " ms");
         }
+    }
+
+    public long findTotalJobs(String dbname,long id){
+        return dao.findTotalJobs(dbname,id);
+    }
+
+    public long findUnUpLoadGPSRecords(String dbname){
+        return dao.findUnUpLoadGPSRecords(dbname);
+    }
+
+    public long findTotalJobsOnCondition(String dbname,long id){
+        return dao.findTotalJobsOnCondition(dbname,id);
+    }
+
+    public long findUnUpLoadGPSRecordsOnCondition(String dbname){
+        return dao.findUnUpLoadGPSRecordsOnCondition(dbname);
+    }
+
+    public long findTotalImgJobs(String dbname,long id){
+        return dao.findTotalImgJobs(dbname,id);
+    }
+    public long findUnUpLoadGPSImgRecords(String dbname){
+        return dao.findUnUpLoadGPSImgRecords(dbname);
     }
 }

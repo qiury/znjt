@@ -2,6 +2,10 @@ package com.znjt.service;
 
 import com.znjt.dao.beans.IRITransferIniBean;
 import com.znjt.dao.impl.IRITransferDao;
+import com.znjt.dao.mapper.IRITransferBeanMapper;
+import com.znjt.datasource.enhance.EnhanceDbUtils;
+import com.znjt.datasource.enhance.EnhanceMapperFactory;
+import org.apache.ibatis.session.SqlSession;
 
 import java.util.List;
 import java.util.Objects;
@@ -57,4 +61,12 @@ public class IRITransferService {
         });
     }
 
+    //根据id查询共计有多少条记录
+    public long findTotalJobs(String dbname,long id){
+        return dao.findTotalJobs(dbname, id);
+    }
+
+    public long findUnUpLoadIRIRecords(String dbname) {
+        return dao.findUnUpLoadIRIRecords(dbname);
+    }
 }

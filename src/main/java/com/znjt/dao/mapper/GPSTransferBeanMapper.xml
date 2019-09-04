@@ -72,8 +72,8 @@
         <!-- 通过ognl表达式获取value对应属性的值，将值赋值给新创建的变量，之后就可以在sql中引用这个变量-->
         <!--<bind name="ps" value="pageSize"/>-->
 
-        select GPSID,COLLECT_TIME,STATUS,LATITUDE,LONGITUDE,SPEED,AZIMUTH,DECLINATION,CREATE_TIME,UPLOAD_TIME,RESULT,AREA,dataid,UPLOADSTATUS,original_Url as originalUrl
-        from gps where UPLOADSTATUS = 0 and ORIGINAL_URL is not null and trim(ORIGINAL_URL) != ''  limit 0,#{pageSize}
+        select id,GPSID,COLLECT_TIME,STATUS,LATITUDE,LONGITUDE,SPEED,AZIMUTH,DECLINATION,CREATE_TIME,UPLOAD_TIME,RESULT,AREA,dataid,UPLOADSTATUS,original_Url as originalUrl
+        from gps where UPLOADSTATUS = 0 and ORIGINAL_URL is not null and trim(ORIGINAL_URL) != '' order by id limit 0,#{pageSize}
     </select>
     <!--获取没有上传的记录-->
     <select id="findUnUpLoadGPSRecordDatasOnCondition" resultType="GPSTransferIniBean" useCache="false">
@@ -89,8 +89,27 @@
         <!-- 通过ognl表达式获取value对应属性的值，将值赋值给新创建的变量，之后就可以在sql中引用这个变量-->
         <!--<bind name="ps" value="pageSize"/>-->
 
-        select GPSID,COLLECT_TIME,STATUS,LATITUDE,LONGITUDE,SPEED,AZIMUTH,DECLINATION,CREATE_TIME,UPLOAD_TIME,RESULT,AREA,dataid,UPLOADSTATUS,original_Url as originalUrl
-        from gps where UPLOADSTATUS = 0 and ORIGINAL_URL is not null and trim(ORIGINAL_URL) != '' and AREA is not null and and trim(AREA) != ''   limit 0,#{pageSize}
+        select id,GPSID,COLLECT_TIME,STATUS,LATITUDE,LONGITUDE,SPEED,AZIMUTH,DECLINATION,CREATE_TIME,UPLOAD_TIME,RESULT,AREA,dataid,UPLOADSTATUS,original_Url as originalUrl
+        from gps where UPLOADSTATUS = 0 and ORIGINAL_URL is not null and trim(ORIGINAL_URL) != '' and AREA is not null and  trim(AREA) != ''  order by id  limit 0,#{pageSize}
+    </select>
+
+    <select id="findTotalJobs" resultType="java.lang.Long">
+        select count(1) from gps where id >= #{id}
+    </select>
+
+
+    <select id="findUnUpLoadGPSRecords" resultType="java.lang.Long">
+         select count(1) from gps where UPLOADSTATUS = 0 and ORIGINAL_URL is not null and trim(ORIGINAL_URL) != ''
+    </select>
+
+
+    <select id="findTotalJobsOnCondition" resultType="java.lang.Long">
+        select count(1) from gps where id >= #{id}  and AREA is not null and  trim(AREA) != ''
+    </select>
+
+
+    <select id="findUnUpLoadGPSRecordsOnCondition" resultType="java.lang.Long">
+         select count(1) from gps where UPLOADSTATUS = 0 and ORIGINAL_URL is not null and trim(ORIGINAL_URL) != '' and AREA is not null and  trim(AREA) != ''
     </select>
 
     <!--
@@ -104,12 +123,21 @@
     select GPSID,STATUS,dataid, original_Url as originalUrl,basedir as baseDir from gps where  ORIGINAL_URL is not null and trim(ORIGINAL_URL) <![CDATA[<>]] ''  and trim(ORIGINAL_URL) <![CDATA[<>]] 'no image'  and  UPLOADSTATUS = 1 and img_uploaded = false   limit 0,#{pageSize}
     -->
     <select id="findUnUpLoadGPSImgDatas" resultType="GPSTransferIniBean" useCache="false" flushCache="false">
-         select GPSID,STATUS,dataid, original_Url as originalUrl,basedir as baseDir from gps where  ORIGINAL_URL is not null and trim(ORIGINAL_URL) != ''  and trim(ORIGINAL_URL) != 'no image'  and  UPLOADSTATUS = 1 and img_uploaded = false   limit 0,#{pageSize}
+         select id, GPSID,STATUS,dataid, original_Url as originalUrl,basedir as baseDir from gps where  ORIGINAL_URL is not null and trim(ORIGINAL_URL) != ''  and trim(ORIGINAL_URL) != 'no image'  and  UPLOADSTATUS = 1 and img_uploaded = false order by id  limit 0,#{pageSize}
     </select>
 
     <select id="findUnUpLoadGPSImgDatas4EvenOrOdd" resultType="GPSTransferIniBean" useCache="false" flushCache="false">
-         select GPSID,STATUS,dataid, original_Url as originalUrl,basedir as baseDir from gps where  ORIGINAL_URL is not null and trim(ORIGINAL_URL) != ''  and trim(ORIGINAL_URL) != 'no image'  and  UPLOADSTATUS = 1 and img_uploaded = false and id%2 = #{mod}  limit 0,#{pageSize}
+         select id, GPSID,STATUS,dataid, original_Url as originalUrl,basedir as baseDir from gps where  ORIGINAL_URL is not null and trim(ORIGINAL_URL) != ''  and trim(ORIGINAL_URL) != 'no image'  and  UPLOADSTATUS = 1 and img_uploaded = false and id%2 = #{mod} order by id  limit 0,#{pageSize}
     </select>
+
+    <select id="findTotalImgJobs" resultType="java.lang.Long">
+         select count(1) from gps where id >=#{id}
+    </select>
+
+    <select id="findUnUpLoadGPSImgRecords" resultType="java.lang.Long">
+        select count(1) from gps where  ORIGINAL_URL is not null and trim(ORIGINAL_URL) != ''  and trim(ORIGINAL_URL) != 'no image'  and  UPLOADSTATUS = 1 and img_uploaded = false;
+    </select>
+
 
     <!--
     更新刚刚更新成功的记录的状态

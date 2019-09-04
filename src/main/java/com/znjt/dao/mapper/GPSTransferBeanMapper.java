@@ -35,4 +35,12 @@ public interface GPSTransferBeanMapper extends Mapper {
     int updateBatchGPSImgPath2DBRecord(List<GPSTransferIniBean> gpsTransferIniBeans);
 
    // void batchInsertMonitorGPSDatas(List<GPSTransferIniBean> gpsTransferIniBeans);
+   //根据id查询共计有多少条记录
+   long findTotalJobs(long id);
+   long findUnUpLoadGPSRecords();
+   long findTotalJobsOnCondition(long id);
+   long findUnUpLoadGPSRecordsOnCondition();
+
+    long findTotalImgJobs(long id);
+    long findUnUpLoadGPSImgRecords();
 }

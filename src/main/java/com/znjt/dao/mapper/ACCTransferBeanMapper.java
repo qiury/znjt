@@ -4,6 +4,7 @@ import com.znjt.dao.beans.ACCTransferIniBean;
 import com.znjt.dao.beans.GPSTransferIniBean;
 import com.znjt.datasource.enhance.Mapper;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -18,6 +19,11 @@ public interface ACCTransferBeanMapper extends Mapper {
      * @return
      */
     List<ACCTransferIniBean> findUnUpLoadACCRecordDatas(int pageSize);
+
     int updateCurrentUpLoadedSuccessACCRescords(List<ACCTransferIniBean> accTransferIniBeans);
     int upLoadACCRecordDatas2UpStream(List<ACCTransferIniBean> accTransferIniBeans);
+
+    //根据id查询共计有多少条记录
+    long findTotalJobs(long id);
+    long findUnUpLoadACCRecords();
 }

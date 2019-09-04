@@ -78,6 +78,29 @@ public class ClientBoot {
     private static final int delay_sec_to_shutdown_sys = 20;
     public static boolean auto_off_os = false;
 
+    //-1表示上传job已经结束，[0-正无穷]表示合法的值
+    private static long ACC_JOB_START_ID = -1;
+    //表示一轮上传工作是否结束
+    private static boolean ACC_JOB_OVER = true;
+
+    private static long GPS_JOB_START_ID = -1;
+    private static boolean GPS_JOB_OVER = true;
+
+    private static long GPS_IMG_JOB_START_ID = -1;
+    private static boolean GPS_IMG_JOB_OVER = true;
+
+    private static long GPS_PIC_JOB_START_ID = -1;
+    private static boolean GPS_PIC_JOB_OVER = true;
+
+    private static long IRI_JOB_START_ID = -1;
+    private static boolean IRI_JOB_OVER = true;
+
+    private static long PCI_JOB_START_ID = -1;
+    private static boolean PCI_JOB_OVER = true;
+
+    //每隔10轮上传就统计一次上传进度
+    private static final int REPEATER = 10;
+
 
     static {
         ArrayBlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>(409600);
@@ -161,15 +184,20 @@ public class ClientBoot {
      */
     private void start_monitor_jobs() {
         start_net_jobs();
-        if(auto_off_os) {
+        if (auto_off_os) {
             start_check_shutdown_sys_jobs();
         }
         if (test_upload_speed) {
             start_gps_img_test_jobs();
         } else {
             start_gps_record_jobs();
-            start_gps_img_jobs4Even();
-            start_gps_img_jobs4Odd();
+            if (!Boot.assign_imgs_path_by_manual) {
+                start_gps_img_jobs4Even();
+                start_gps_img_jobs4Odd();
+            } else {
+                //手工指定图像路径，不需要执行图像上传任务，只需要执行图像路径同步即可
+                start_gps_img_path_jobs();
+            }
             start_acc_jobs();
             start_pci_jobs();
             start_iri_jobs();
@@ -283,6 +311,167 @@ public class ClientBoot {
 
     }
 
+    /**
+     * @param
+     * @Desc: 计算ACC数据上传的进度条
+     * @return: void
+     * @Author: qiuzx
+     * @Date: 2019-08-30
+     * @Copyright 2019-2020 BTT - Powered By 研发中心
+     * @version V1.0
+     */
+    private void calculate_acc_progressbar_job() {
+
+        if (ACC_JOB_START_ID != -1) {
+            LoggerUtils.debug(this.logger, "开始统计ACC数据上传进度信息...");
+
+            long totalRecs = this.accTransferService.findTotalJobs("master", ACC_JOB_START_ID);
+            long unUploadRecs = this.accTransferService.findUnUpLoadACCRecords("master");
+
+            int upLoadPercent = getUploadPercent(totalRecs, unUploadRecs);
+            System.err.print(Shutdown.getPercentProgress("ACC", upLoadPercent));
+
+            LoggerUtils.debug(this.logger, "统计ACC数据上传进度信息...结束");
+        }
+        if (ACC_JOB_OVER) {
+            ACC_JOB_START_ID = -1;
+        }
+
+    }
+
+    /**
+     * @param
+     * @Desc: 计算IRI数据上传的进度条
+     * @return: void
+     * @Author: qiuzx
+     * @Date: 2019-08-30
+     * @Copyright 2019-2020 BTT - Powered By 研发中心
+     * @version V1.0
+     */
+    private void calculate_iri_progressbar_job() {
+        if (IRI_JOB_START_ID != -1) {
+            LoggerUtils.debug(this.logger, "开始统计IRI数据上传进度信息...");
+
+            long totalRecs = this.iriTransferService.findTotalJobs("master", IRI_JOB_START_ID);
+            long unUploadRecs = this.iriTransferService.findUnUpLoadIRIRecords("master");
+
+            int upLoadPercent = getUploadPercent(totalRecs, unUploadRecs);
+            System.err.print(Shutdown.getPercentProgress("IRI", upLoadPercent));
+
+            LoggerUtils.debug(this.logger, "统计IRI数据上传进度信息...结束");
+        }
+        if (IRI_JOB_OVER) {
+            IRI_JOB_START_ID = -1;
+        }
+    }
+
+    /**
+     * @param
+     * @Desc: 计算gps image数据上传的进度条
+     * @return: void
+     * @Author: qiuzx
+     * @Date: 2019-08-30
+     * @Copyright 2019-2020 BTT - Powered By 研发中心
+     * @version V1.0
+     */
+    private void calculate_gps_img_progressbar_job() {
+        if (GPS_JOB_START_ID != -1) {
+            LoggerUtils.debug(this.logger, "开始统计Image数据上传进度信息...");
+            long totalRecs = this.gpsTransferService.findTotalImgJobs("master", GPS_IMG_JOB_START_ID);
+            long unUploadRecs = this.gpsTransferService.findUnUpLoadGPSImgRecords("master");
+            int upLoadPercent = getUploadPercent(totalRecs, unUploadRecs);
+            System.err.print(Shutdown.getPercentProgress(Boot.assign_imgs_path_by_manual?"图片路径数据":"图片数据", upLoadPercent));
+            LoggerUtils.debug(this.logger, "统计Image数据上传进度信息...结束");
+        }
+        if (IRI_JOB_OVER) {
+            IRI_JOB_START_ID = -1;
+        }
+    }
+
+    /**
+     * @param condition 是否增加条件过滤
+     * @Desc: 计算ACC数据上传的进度条
+     * @return: void
+     * @Author: qiuzx
+     * @Date: 2019-08-30
+     * @Copyright 2019-2020 BTT - Powered By 研发中心
+     * @version V1.0
+     */
+    private void calculate_gps_progressbar_job(boolean condition) {
+        long totalRecs = -1;
+        long unUploadRecs = -1;
+        if (GPS_JOB_START_ID != -1) {
+            LoggerUtils.debug(this.logger, "开始统计GPS数据上传进度信息...");
+            if (condition) {
+                totalRecs = this.gpsTransferService.findTotalJobsOnCondition("master", GPS_JOB_START_ID);
+                unUploadRecs = this.gpsTransferService.findUnUpLoadGPSRecordsOnCondition("master");
+            } else {
+                totalRecs = this.gpsTransferService.findTotalJobs("master", GPS_JOB_START_ID);
+                unUploadRecs = this.gpsTransferService.findUnUpLoadGPSRecords("master");
+            }
+            int upLoadPercent = getUploadPercent(totalRecs, unUploadRecs);
+            System.err.print(Shutdown.getPercentProgress("GPS", upLoadPercent));
+
+            LoggerUtils.debug(this.logger, "统计GPS数据上传进度信息...结束");
+        }
+        if (GPS_JOB_OVER) {
+            GPS_JOB_START_ID = -1;
+        }
+
+    }
+
+    /**
+     * @param
+     * @Desc: 计算PCI数据上传的进度条
+     * @return: void
+     * @Author: qiuzx
+     * @Date: 2019-08-30
+     * @Copyright 2019-2020 BTT - Powered By 研发中心
+     * @version V1.0
+     */
+    private void calculate_pci_progressbar_job() {
+
+        if (PCI_JOB_START_ID != -1) {
+            LoggerUtils.debug(this.logger, "开始统计PCI数据上传进度信息...");
+
+            long totalRecs = this.pciTransferService.findTotalJobs("master", PCI_JOB_START_ID);
+            long unUploadRecs = this.pciTransferService.findUnUpLoadPCIRecords("master");
+
+            int upLoadPercent = getUploadPercent(totalRecs, unUploadRecs);
+            System.err.print(Shutdown.getPercentProgress("PCI", upLoadPercent));
+
+            LoggerUtils.debug(this.logger, "统计PCI数据上传进度信息...结束");
+        }
+        if (PCI_JOB_OVER) {
+            PCI_JOB_START_ID = -1;
+        }
+
+    }
+
+
+    /**
+     * @param totalRecs
+     * @param unUploadRecs
+     * @Desc: 获取已经上传的百分比
+     * @return: int
+     * @Author: qiuzx
+     * @Date: 2019-08-30
+     * @Copyright 2019-2020 BTT - Powered By 研发中心
+     * @version V1.0
+     */
+    private int getUploadPercent(long totalRecs, long unUploadRecs) {
+        if (totalRecs == 0) {
+            return 100;
+        } else {
+            //说明存在数据动态上传中，此时输出99%
+            if (unUploadRecs > totalRecs) {
+                return 99;
+            } else {
+                return (int) (((totalRecs - unUploadRecs) * 1.0 / totalRecs) * 100);
+            }
+        }
+    }
+
     private void start_pci_jobs() {
         if (ext_tables == null || !Arrays.asList(ext_tables).contains("pci")) {
             return;
@@ -362,6 +551,19 @@ public class ClientBoot {
 
     }
 
+    private void start_gps_img_path_jobs() {
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            try {
+                start_monitor_gps_img_paths();
+            } catch (Exception ex) {
+                update_lastest_upload_time();
+                LoggerUtils.error(this.logger, "gps图像[路径]数据传输出现一次失败...详情参照日志" + ExceptionInfoUtils.getExceptionCauseInfo(ex));
+            }
+
+        }, 3, 10, TimeUnit.SECONDS);
+    }
+
+
     private void start_gps_img_jobs4Even() {
         scheduledExecutorService.scheduleAtFixedRate(() -> {
             if (net_allowed_connect) {
@@ -422,7 +624,7 @@ public class ClientBoot {
         } catch (Exception ex) {
             LoggerUtils.error(logger, ExceptionInfoUtils.getExceptionCauseInfo(ex));
         }
-        LoggerUtils.info(logger, "当前网络系统禁止了执行图像上传操作");
+        LoggerUtils.warn(logger, "当前网络系统禁止了执行图像上传操作");
         return false;
     }
 
@@ -446,6 +648,47 @@ public class ClientBoot {
     }
 
     /**
+     * 检查gps中未上传的img路径
+     */
+    private void start_monitor_gps_img_paths() {
+        //获取所有为上传的图像记录信息
+        List<GPSTransferIniBean> recordDatas = gpsTransferService.findUnUpLoadGPSImgDatas(Boot.DOWNSTREAM_DBNAME, Boot.RECORD_BATCH_SIZE);
+        if (recordDatas != null && recordDatas.size() > 0) {
+            GPS_IMG_JOB_START_ID = recordDatas.get(0).getId();
+        } else {
+            GPS_IMG_JOB_OVER = true;
+        }
+        int current_repeater = 0;
+        boolean has_err = false;
+        while (recordDatas != null && recordDatas.size() > 0) {
+            current_repeater++;
+            if (current_repeater > REPEATER) {
+                calculate_gps_img_progressbar_job();
+            }
+            update_lastest_upload_time();
+            logger.info("开始上传[gps图像路径]数据...[" + recordDatas.size() + "]条");
+            try {
+                //上传图像
+                client.uploadImgDataPath(recordDatas);
+                recordDatas = gpsTransferService.findUnUpLoadGPSImgDatas(Boot.DOWNSTREAM_DBNAME, Boot.RECORD_BATCH_SIZE);
+            } catch (Exception ex) {
+                has_err = true;
+                //上传图像出现任何异常都要终止本次任务，重新进入单步上传，放置图像重复上传
+                LoggerUtils.error(logger, ExceptionInfoUtils.getExceptionCauseInfo(ex));
+                break;
+            }
+        }
+        GPS_IMG_JOB_OVER = true;
+        calculate_gps_img_progressbar_job();
+
+        if (has_err) {
+            LoggerUtils.warn(logger, "图像传输出现超时异常，终止此次图像同步任务...");
+        } else {
+            LoggerUtils.warn(logger, "没有gps图像路径数据需要上传...");
+        }
+    }
+
+    /**
      * 检查gps中未上传的img信息
      *
      * @param even 上传的是
@@ -457,18 +700,34 @@ public class ClientBoot {
         LoggerUtils.info(logger, "检查是否存在要上传的gps图像数据...");
         boolean has_err = false;
         String msg = even ? "偶数记录" : "奇数记录";
-
+        GPS_IMG_JOB_OVER = false;
         //开始批上传的速度控制在2条，如果带宽准许，会逐步提升上传记录记录数。
         int dync_batch_size = 2;
         //List<GPSTransferIniBean> recordDatas = gpsTransferService.findUnUpLoadGPSImgDatas(Boot.DOWNSTREAM_DBNAME, Boot.IMAGE_BATCH_SIZE*2);
-        List<GPSTransferIniBean> recordDatas = gpsTransferService.findUnUpLoadGPSImgDatas4EvenOrOdd(Boot.DOWNSTREAM_DBNAME, Boot.IMAGE_BATCH_SIZE * 2, even ? 0 : 1);
+        List<GPSTransferIniBean> recordDatas = null;
+        try {
+            recordDatas = gpsTransferService.findUnUpLoadGPSImgDatas4EvenOrOdd(Boot.DOWNSTREAM_DBNAME, Boot.IMAGE_BATCH_SIZE * 2, even ? 0 : 1);
+            if (recordDatas != null && recordDatas.size() > 0) {
+                GPS_IMG_JOB_START_ID = recordDatas.get(0).getId();
+            } else {
+                GPS_IMG_JOB_OVER = true;
+            }
+        }catch (Exception ex){
+            LoggerUtils.warn(this.logger, ExceptionInfoUtils.getExceptionCauseInfo(ex));
+            throw new RuntimeException("查询Master机器GPS图像数据失败 " + getExceptionCause(ex));
+        }
+
         invoke_time++;
         UpLoadReson upLoadReson = null;
         long uplaod_speed = -1;
         long consumerMils = -1;
+        int current_repeater = 0;
         while (recordDatas != null && recordDatas.size() > 0) {
             update_lastest_upload_time();
-            update_lastest_upload_time();
+            current_repeater++;
+            if (current_repeater > REPEATER) {
+                calculate_gps_img_progressbar_job();
+            }
             if (!check_net_status()) {
                 break;
             }
@@ -486,25 +745,6 @@ public class ClientBoot {
 
             //对批量上传的图像数据进行速度判断，如果速度达不到就自动降低批量上传的大小
             if (!by_sync_single && upLoadReson != null) {
-//                uplaod_speed = upLoadReson.getSpeed();
-//                if(uplaod_speed>0){
-//                    //转换为100KB的单位
-//                    uplaod_speed = uplaod_speed/(1024*100);
-//                    //没有达到100KB每秒
-//                    if(uplaod_speed==0){
-//                        dync_batch_size = dync_batch_size/2;
-//                    }else{
-//                        dync_batch_size = dync_batch_size*2;
-//                    }
-//                    //现在批量最小值
-//                    if(dync_batch_size<2){
-//                        dync_batch_size = 2;
-//                    }
-//                    //限制批量最大值
-//                    if(dync_batch_size>Boot.IMAGE_BATCH_SIZE){
-//                        dync_batch_size = Boot.IMAGE_BATCH_SIZE;
-//                    }
-//                }
                 if (upLoadReson.getUpdate_records() == 0) {
                     LoggerUtils.warn(logger, "批量同步图像到服务器，由于服务器后台数据验证原因没有入库，终止此次图像同步任务...[等待下次同步单条数据，进行数据修复]");
                     has_err = true;
@@ -558,10 +798,14 @@ public class ClientBoot {
                 break;
             }
         }
+        GPS_IMG_JOB_OVER = true;
+
+        calculate_gps_img_progressbar_job();
+
         if (has_err) {
             LoggerUtils.warn(logger, "图像传输出现超时异常，终止此次图像同步任务...");
         } else {
-            LoggerUtils.info(logger, "没有gps图像数据需要上传...");
+            LoggerUtils.warn(logger, "没有gps图像数据需要上传...");
         }
 
     }
@@ -582,9 +826,23 @@ public class ClientBoot {
      */
     private void start_monitor_gps_records() {
         LoggerUtils.info(logger, "检查是否存在要上传的gps记录数据...");
-        List<GPSTransferIniBean> recordData = loadGPSRecordDataOnCondition();
-        ;
+        GPS_JOB_OVER = false;
+        List<GPSTransferIniBean> recordData = loadGPSRecordDataOnCondition(Boot.RECORD_BATCH_SIZE);
+        if (recordData != null && recordData.size() > 0) {
+            GPS_JOB_START_ID = recordData.get(0).getId();
+        } else {
+            GPS_JOB_START_ID = -1;
+            GPS_JOB_OVER = true;
+        }
+
+        int current_repeater = 0;
         while (recordData != null && recordData.size() > 0) {
+            current_repeater++;
+            if (current_repeater >= REPEATER) {
+                current_repeater = 0;
+                calculate_gps_progressbar_job(this.multi_condition_on_gps);
+            }
+
             update_lastest_upload_time();
             limiting();
             try {
@@ -602,24 +860,27 @@ public class ClientBoot {
                 throw new RuntimeException("更新本地gps数据出现异常，查询失败" + getExceptionCause(ex));
             }
             LoggerUtils.info(this.logger, "检查Master是否存在要上传的gps记录数据...");
-            recordData = loadGPSRecordDataOnCondition();
+            recordData = loadGPSRecordDataOnCondition(Boot.RECORD_BATCH_SIZE);
             if (!this.net_allowed_connect || this.exit_sys_stauts) {
                 break;
             }
         }
-        LoggerUtils.info(this.logger, "没有gps记录数据需要上传...");
+        GPS_JOB_OVER = true;
+        //最后统计一次
+        calculate_gps_progressbar_job(this.multi_condition_on_gps);
+        LoggerUtils.warn(this.logger, "没有gps记录数据需要上传...");
     }
 
-    private List<GPSTransferIniBean> loadGPSRecordDataOnCondition() {
+    private List<GPSTransferIniBean> loadGPSRecordDataOnCondition(int batchSize) {
         if (this.multi_condition_on_gps) {
             try {
-                return this.gpsTransferService.findUnUpLoadGPSRecordDatasOnCondition("master", Boot.RECORD_BATCH_SIZE);
+                return this.gpsTransferService.findUnUpLoadGPSRecordDatasOnCondition("master", batchSize);
             } catch (Exception ex) {
                 throw new RuntimeException("查询Master的gps数据出现异常，查询失败" + getExceptionCause(ex));
             }
         }
         try {
-            return this.gpsTransferService.findUnUpLoadGPSRecordDatas("master", Boot.RECORD_BATCH_SIZE);
+            return this.gpsTransferService.findUnUpLoadGPSRecordDatas("master", batchSize);
         } catch (Exception ex) {
             throw new RuntimeException("查询Master的gps数据出现异常，查询失败" + getExceptionCause(ex));
         }
@@ -631,14 +892,31 @@ public class ClientBoot {
     private void start_monitor_acc() {
         LoggerUtils.info(this.logger, "检查Master是否存在要上传的ACC记录数据...");
         List<ACCTransferIniBean> recordDatas = null;
+        ACC_JOB_OVER = false;
         try {
             recordDatas = this.accTransferService.findUnUpLoadACCRecordDatas("master", Boot.RECORD_BATCH_SIZE);
+            if (recordDatas != null && recordDatas.size() > 0) {
+                ACC_JOB_START_ID = recordDatas.get(0).getId();
+            } else {
+                //表示任务结束
+                ACC_JOB_START_ID = -1;
+                ACC_JOB_OVER = true;
+            }
         } catch (Exception ex) {
             LoggerUtils.warn(this.logger, ExceptionInfoUtils.getExceptionCauseInfo(ex));
             throw new RuntimeException("查询Master机器ACC数据失败 " + getExceptionCause(ex));
         }
 
+        int current_repeater = 0;
         while (recordDatas != null && recordDatas.size() > 0) {
+            current_repeater++;
+
+            if (current_repeater >= REPEATER) {
+                current_repeater = 0;
+                //对传输进度进行一次计算
+                calculate_acc_progressbar_job();
+            }
+
             update_lastest_upload_time();
             limiting();
             LoggerUtils.info(this.logger, "开始批量上传ACC记录[" + recordDatas.size() + "]条");
@@ -668,7 +946,11 @@ public class ClientBoot {
                 break;
             }
         }
-        LoggerUtils.info(this.logger, "没有ACC记录数据需要上传...");
+        ACC_JOB_OVER = true;
+        //一轮结束后对传输进度进行一次统计
+        calculate_acc_progressbar_job();
+
+        LoggerUtils.warn(this.logger, "没有ACC记录数据需要上传...");
     }
 
     /**
@@ -677,13 +959,33 @@ public class ClientBoot {
     private void start_monitor_iri() {
         LoggerUtils.debug(this.logger, "检查Master是否存在要上传的iri记录数据...");
         List<IRITransferIniBean> recordDatas = null;
+//        try {
+//            recordDatas = this.iriTransferService.findUnUpLoadIRIRecordDatas("master", Boot.RECORD_BATCH_SIZE);
+//        } catch (Exception ex) {
+//            throw new RuntimeException("查询Master的iri数据失败 " + getExceptionCause(ex));
+//        }
+        IRI_JOB_OVER = false;
         try {
             recordDatas = this.iriTransferService.findUnUpLoadIRIRecordDatas("master", Boot.RECORD_BATCH_SIZE);
+            if (recordDatas != null && recordDatas.size() > 0) {
+                IRI_JOB_START_ID = recordDatas.get(0).getId();
+            } else {
+                IRI_JOB_OVER = true;
+                IRI_JOB_START_ID = -1;
+            }
         } catch (Exception ex) {
             throw new RuntimeException("查询Master的iri数据失败 " + getExceptionCause(ex));
         }
+        int current_repeater = 0;
         while (recordDatas != null && recordDatas.size() > 0) {
             limiting();
+            current_repeater++;
+
+            if (current_repeater >= REPEATER) {
+                current_repeater = 0;
+                calculate_iri_progressbar_job();
+            }
+
             update_lastest_upload_time();
             try {
                 LoggerUtils.info(this.logger, "开始批量上传iri记录[" + recordDatas.size() + "]条");
@@ -711,7 +1013,10 @@ public class ClientBoot {
                 break;
             }
         }
-        LoggerUtils.info(this.logger, "Master没有iri记录数据需要上传...");
+        IRI_JOB_OVER = true;
+        //任务结束时统计一次
+        calculate_iri_progressbar_job();
+        LoggerUtils.warn(this.logger, "Master没有iri记录数据需要上传...");
     }
 
     /**
@@ -720,13 +1025,25 @@ public class ClientBoot {
     private void start_monitor_pci() {
         LoggerUtils.info(this.logger, "检查Master是否存在要上传的pci记录数据...");
         List<PCITransferIniBean> recordDatas = null;
+        PCI_JOB_OVER = false;
         try {
             recordDatas = this.pciTransferService.findUnUpLoadPCIRecordDatas("master", Boot.RECORD_BATCH_SIZE);
+            if (recordDatas != null && recordDatas.size() > 0) {
+                PCI_JOB_START_ID = recordDatas.get(0).getId();
+            } else {
+                PCI_JOB_OVER = true;
+            }
         } catch (Exception ex) {
             LoggerUtils.debug(this.logger, ExceptionInfoUtils.getExceptionCauseInfo(ex));
             throw new RuntimeException("查询Master的pci数据失败 " + getExceptionCause(ex));
         }
+        int current_repeater = 0;
         while (recordDatas != null && recordDatas.size() > 0) {
+            current_repeater++;
+            if (current_repeater > REPEATER) {
+                current_repeater = 0;
+                calculate_pci_progressbar_job();
+            }
             limiting();
             update_lastest_upload_time();
             try {
@@ -757,7 +1074,10 @@ public class ClientBoot {
                 break;
             }
         }
-        LoggerUtils.info(this.logger, "没有pci记录数据需要上传...");
+        PCI_JOB_OVER = true;
+        calculate_pci_progressbar_job();
+
+        LoggerUtils.warn(this.logger, "没有pci记录数据需要上传...");
     }
 
     private void limiting() {

@@ -19,4 +19,8 @@ public interface IRITransferBeanMapper extends Mapper {
     List<IRITransferIniBean> findUnUpLoadIRIRecordDatas(int pageSize);
     void updateCurrentUpLoadedSuccessIRIRescords(List<IRITransferIniBean> iriTransferIniBeans);
     void upLoadIRIRecordDatas2UpStream(List<IRITransferIniBean> iriTransferIniBeans);
+
+    //根据id查询共计有多少条记录
+    long findTotalJobs(long id);
+    long findUnUpLoadIRIRecords();
 }

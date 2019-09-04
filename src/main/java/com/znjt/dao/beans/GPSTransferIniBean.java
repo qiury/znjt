@@ -11,6 +11,7 @@ import java.util.List;
  * @author qiuzx
  */
 public class GPSTransferIniBean {
+    private long id;
     private String gpsid;
     private Date collect_time;
     private String status;
@@ -36,8 +37,17 @@ public class GPSTransferIniBean {
     private String clientRecordId;
     private String file_full_path;
     private int totalLostedSize = 0;
+
     //文件名称
     private List<String> fileNames;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public String getGpsid() {
         return gpsid;

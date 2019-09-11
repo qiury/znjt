@@ -36,7 +36,7 @@ public class FileIOUtils {
         byte[] bytes = null;
         if(path!=null){
             //测试路
-            path="/Users/qiuzx/Downloads/zjz.jpeg";
+            //path="/Users/qiuzx/Downloads/zjz.jpeg";
             try(InputStream is = new BufferedInputStream(new FileInputStream(path),BUFFER_SIZE)){
                 bytes = new byte[is.available()];
                 IOUtils.read(is,bytes);
